@@ -7,6 +7,7 @@
 /* ========================================================================= */
 static Symbol SMB_yield_;
 static Symbol SMB_evaluate_;
+static Symbol SMB_for_thread_holder_;
 /* ========================================================================= */
 
 void reset_thread(Thread thread)
@@ -69,6 +70,18 @@ NATIVE1(Thread_new_)
     RETURN_FROM_NATIVE(new_thread);
 }
 
+NATIVE2(Thread_primFor_holder_)
+    Optr value          = NATIVE_ARG(0);
+    Optr holder         = NATIVE_ARG(1);
+    RETURN_FROM_NATIVE(self);
+    _thread_->backup_pc = pc;
+    Thread previous     = _thread_;
+    _thread_            = _scheduler_thread_;
+    reset_thread(_scheduler_thread_); // reset the scheduler thread as if it had been created newly
+    Class_direct_dispatch((Optr)Thread_Class, HEADER(Thread_Class),
+                          (Optr)SMB_for_thread_holder_, 3, (Optr)value, (Optr)previous, (Optr)holder);
+}
+
 time_t start_sleep_time;
 
 NATIVE1(Thread_sleep_)
@@ -93,6 +106,7 @@ void post_init_Thread()
 {
     SMB_yield_    = new_Symbol(L"yield:");
     SMB_evaluate_ = new_Symbol(L"evaluate:");
+    SMB_for_thread_holder_ = new_Symbol(L"for:thread:holder:");   
     
     PLUGIN natives = add_plugin(L"Runtime.Thread");
     store_native(natives, L"current", NM_Thread_current);
@@ -100,6 +114,7 @@ void post_init_Thread()
     store_native(natives, L"new:", NM_Thread_new_);
     store_native(natives, L"sleep", NM_Thread_sleep_);
     store_native(natives, L"primYield", NM_Thread_primYield);
+    store_native(natives, L"primFor:holder:", NM_Thread_primFor_holder_);
     //  ((Class)Thread_Class)->cvars[0] = (Optr)_threads_;
     // ((Class)Thread_Class)->cvars[1] = (Optr)_thread_;   
 }

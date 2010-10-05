@@ -25,9 +25,9 @@ CFLAGS  += -pipe -I. -Wall -std=c99 -DASSERT_FAIL
 LDFLAGS += -lgc -lm -ldl
 #LDFLAGS += -lpthread
 ifeq ($(findstring Darwin,$(OS)),Darwin)
-#	CFLAGS  += -arch i386 -arch x86_64 -arch ppc
-#	LDFLAGS += -arch i386 -arch x86_64 -arch ppc
-	CC	= clang
+	CFLAGS  += -arch x86_64
+	LDFLAGS += -arch x86_64
+	CC	= gcc
 else
     LDFLAGS +=  -export-dynamic
 endif

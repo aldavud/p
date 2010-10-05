@@ -18,7 +18,7 @@ String new_String(const wchar_t * input)
     HEADER(result) = String_Class;
     wcsncpy(result->value, input, size);
     result->size   = size - 1;
-    // result->hash = NULL;
+    result->hash = NULL;
     return result;
 }
 
@@ -31,7 +31,7 @@ String new_String_sized(uns_int size)
     while(size--) {
         result->value[size] = '\0';
     }
-    // result->hash = NULL;
+    result->hash = NULL;
     return result;
 }
 
@@ -53,6 +53,10 @@ SmallInt String_hash(String string)
         string->hash = wchar_hash(string->value, string->size);
     }
     return string->hash;
+}
+
+NATIVE0(String_hash)
+    RETURN_FROM_NATIVE(String_hash((String)self));
 }
 
 String String_concat_(String str1, String str2)
@@ -209,10 +213,11 @@ void post_init_String()
     
     INIT_NATIVE(String_concat_);    
 
-    PLUGIN natives = add_plugin(L"Type.String");
+    PLUGIN natives = add_plugin(L"String.String");
     store_native(natives, L",",   NM_String_concat_);
     store_native(natives, L"asSymbol",  NM_String_asSymbol);
     store_native(natives, L"at:put:",   NM_String_at_put_);
     store_native(natives, L"asNumber",  NM_String_asNumber);
+    store_native(natives, L"hash",  NM_String_hash);
 }
 

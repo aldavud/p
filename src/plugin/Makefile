@@ -13,8 +13,8 @@ LDFLAGS += -lm -lgc -lncurses
 ifeq ($(findstring Darwin,$(OS)),Darwin)
     CFLAGS  += -fno-common -DPIC 
     LDFLAGS += -dynamiclib -undefined dynamic_lookup
-#	CFLAGS  += -arch i386 -arch x86_64 -arch ppc
-#	LDFLAGS += -arch i386 -arch x86_64 -arch ppc
+	CFLAGS  += -arch x86_64
+	LDFLAGS += -arch x86_64
 else
     CFLAGS  += -fPIC
     LDFLAGS += -shared
