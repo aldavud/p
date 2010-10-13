@@ -88,7 +88,7 @@ void invoke(Optr method, Optr self, uns_int argc) {
             return;
         }
 
-        if (counter >= 500) {
+        if (counter >= 5000) {
             counter = 0;
             yield();
         } else {
@@ -167,19 +167,19 @@ void Class_direct_dispatch(Optr self, Class class, Optr msg,
     long idx;
     va_start(args, argc);
 
-    if (_thread_->next_interpreter != nil) {
-        Message message = new_Message((Optr)msg, argc);
-        for (idx = 0; idx < argc; idx++) {
-            message->arguments[idx] = va_arg(args, Optr);
-        }
-        Optr next_interpreter = _thread_->next_interpreter;
-        _thread_->next_interpreter = nil;
-        Class_direct_dispatch(
-            next_interpreter,
-            HEADER(next_interpreter),
-            (Optr)SMB_sendNext_to_class_, 3,
-            (Optr)message, self, (Optr)class);
-    } else {
+//    if (_thread_->next_interpreter != nil) {
+//        Message message = new_Message((Optr)msg, argc);
+//        for (idx = 0; idx < argc; idx++) {
+//            message->arguments[idx] = va_arg(args, Optr);
+//        }
+//        Optr next_interpreter = _thread_->next_interpreter;
+//        _thread_->next_interpreter = nil;
+//        Class_direct_dispatch(
+//            next_interpreter,
+//            HEADER(next_interpreter),
+//            (Optr)SMB_sendNext_to_class_, 3,
+//            (Optr)message, self, (Optr)class);
+//    } else {
         /* Send obj. TODO update Send>>eval to be able to remove this */
         /* TODO optimize by claim + poke instead of push */
         PUSH_EXP(self);
@@ -187,7 +187,7 @@ void Class_direct_dispatch(Optr self, Class class, Optr msg,
             PUSH_EXP(va_arg(args, Optr));
         }
         Class_do_dispatch(self, class, msg, argc, T_Class_direct_dispatch);
-    }
+//    }
     va_end(args);
 }
 
@@ -196,25 +196,25 @@ void Class_direct_dispatch_withArguments(Optr self, Class class,
 {
     long idx;
     
-    if (_thread_->next_interpreter != nil) {
-        Message message = new_Message((Optr)msg, args->size);
-        for (idx = 0; idx < args->size; idx++) {
-            message->arguments[idx] = args->values[idx];
-        }
-        Optr next_interpreter = _thread_->next_interpreter;
-        _thread_->next_interpreter = nil;
-        Class_direct_dispatch(
-            next_interpreter,
-            HEADER(next_interpreter),
-            (Optr)SMB_sendNext_to_class_, 3,
-            (Optr)message, self, (Optr)class);
-    } else {
+//    if (_thread_->next_interpreter != nil) {
+//        Message message = new_Message((Optr)msg, args->size);
+//        for (idx = 0; idx < args->size; idx++) {
+//            message->arguments[idx] = args->values[idx];
+//        }
+//        Optr next_interpreter = _thread_->next_interpreter;
+//        _thread_->next_interpreter = nil;
+//        Class_direct_dispatch(
+//            next_interpreter,
+//            HEADER(next_interpreter),
+//            (Optr)SMB_sendNext_to_class_, 3,
+//            (Optr)message, self, (Optr)class);
+//    } else {
         PUSH_EXP(self);
         for (idx = 0; idx < args->size; idx++) {
             PUSH_EXP(args->values[idx]);
         }
         Class_do_dispatch(self, class, msg, args->size, T_Class_direct_dispatch);
-    }
+//    }
 }
 
 void Class_dispatch(Optr self, Class class, uns_int argc)
