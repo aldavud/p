@@ -11,7 +11,7 @@
 /* ========================================================================= */
 
 struct BlockContext_t {
-    ARRAY_SIZE_TYPE;
+    uns_int                 size;
     uns_int                 scope_id;
     Optr                    stacked;
     BlockClosure            closure;

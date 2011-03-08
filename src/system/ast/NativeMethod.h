@@ -8,7 +8,7 @@
 /* ========================================================================= */
 
 struct NativeMethod_t {
-    ARRAY_SIZE_TYPE;
+    uns_int size;
 	Array   params;
     Array   locals;
     Optr    package;

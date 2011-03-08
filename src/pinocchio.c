@@ -41,8 +41,7 @@ static void cleanup()
 void pinocchio_exit(int status)
 {
     cleanup();
-    status / 0;
-    //exit(status);
+    exit(status);
 }
 
 /* ========================================================================= */
@@ -180,7 +179,7 @@ static void bootstrap()
     metaclass              = NEW_t(Class);
     Class Metaclass_mclass = (Class)basic_instantiate_Object(metaclass, METACLASS_SIZE);
     HEADER(metaclass)      = Metaclass_mclass;
-    Metaclass_mclass->name = (Symbol)metaclass;
+    Metaclass_mclass->name = (String)metaclass;
 
     behavior                 = new_Bootstrapping_Class();
     class                    = new_Bootstrapping_Class();
@@ -189,7 +188,6 @@ static void bootstrap()
     DictBucket_Class         = new_Bootstrapping_Class();
     Dictionary_Class         = new_Bootstrapping_Class();
     IdentityDictionary_Class = new_Bootstrapping_Class();
-    MethodDictionary_Class   = new_Bootstrapping_Class();
     SmallInt_Class           = new_Bootstrapping_Class();
 
     init_numbercache();
@@ -202,7 +200,6 @@ static void bootstrap()
     INIT_CLASS(DictBucket);
     INIT_CLASS(Dictionary);
     INIT_CLASS(IdentityDictionary);
-    INIT_CLASS(MethodDictionary);
 
     Slot_Class            = new_Bootstrapping_Class();
     Symbol_Class          = new_Bootstrapping_Class();
@@ -229,7 +226,7 @@ static void bootstrap()
     INIT_CLASS(WordsLayout);
 
     empty_Array          = NEW_t(Array);
-    SET_SIZE(empty_Array, 0);
+    empty_Array->size    = 0;
     HEADER(empty_Array)  = Array_Class;
 
     empty_array_layout  = (Optr)create_layout_with_vars(ArrayLayout_Class, 0);

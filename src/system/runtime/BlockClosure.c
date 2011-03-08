@@ -20,8 +20,8 @@ static BlockContext activate_block(BlockClosure closure, long argc)
 {
 	//TODO merge with BlockContext
     Block block          = closure->code;
-    uns_int paramc       = GET_SIZE(block->params);
-    uns_int localc       = GET_SIZE(block->locals);
+    uns_int paramc       = block->params->size;
+    uns_int localc       = block->locals->size;
     uns_int size         = paramc + localc;
 
     BlockContext context = (BlockContext)&PEEK_EXP(argc - 1);
@@ -41,7 +41,7 @@ static BlockContext activate_block(BlockClosure closure, long argc)
     }
     
     HEADER(context)       = BlockContext_Class;
-	SET_SIZE(context, size);
+	context->size         = size;
 	context->stacked      = true;
     context->parent_frame = current_env();
     set_env((Optr)context);
@@ -58,14 +58,14 @@ static BlockContext activate_block(BlockClosure closure, long argc)
 void BlockClosure_apply(BlockClosure closure, uns_int argc)
 {
     Block block = closure->code;
-    assert1(argc == GET_SIZE(block->params), "Argument count mismatch");
+    assert1(argc == block->params->size, "Argument count mismatch");
 
-    if (GET_SIZE(block) == 0) {
+    if (block->size == 0) { 
         RETURN_FROM_NATIVE(nil);
         return;
     }
 
-    if (GET_SIZE(block->locals) == 0 && argc == 0) {
+    if (block->locals->size == 0 && argc == 0) {
         BlockContext env = current_env();
         POKE_EXP(0, env);
         set_env((Optr)closure->context);
@@ -96,7 +96,7 @@ NATIVE(BlockClosure_apply_)
 }
 
 NATIVE0(BlockClosure_numArgs) 
-    RETURN_FROM_NATIVE(new_SmallInt(GET_SIZE(((BlockClosure)self)->code->params)));
+    RETURN_FROM_NATIVE(new_SmallInt(((BlockClosure)self)->code->params->size));
 }
 
 NATIVE1(BlockClosure_valueWithArguments_)
@@ -104,13 +104,13 @@ NATIVE1(BlockClosure_valueWithArguments_)
     ASSERT_TAG_LAYOUT(GETTAG(args), Array);
 
     long pos = 0;
-    while(pos < GET_SIZE(args)) {
+    while(pos < args->size) {
         PUSH_EXP(args->values[pos]);
         pos++;
     }
     
     BlockClosure closure = (BlockClosure)self;
-    BlockClosure_apply(closure, GET_SIZE(args));
+    BlockClosure_apply(closure, args->size);
 }
 
 /* ========================================================================= */

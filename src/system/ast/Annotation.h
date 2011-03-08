@@ -6,7 +6,7 @@
 /* ========================================================================= */
 
 struct Annotation_t {
-    ARRAY_SIZE_TYPE;
+    uns_int size;
     Optr  selector;
     Optr  arguments[];
 };

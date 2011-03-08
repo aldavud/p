@@ -11,7 +11,6 @@
 Class metaclass;
 Class class;
 Class behavior;
-Class MethodDictionary_Class;
 
 /* ========================================================================= */
 static Symbol SMB_doesNotUnderstand_;
@@ -32,18 +31,6 @@ Optr basic_instantiate_Object(Class class, uns_int size)
 
 /* ========================================================================= */
 
-IdentityDictionary new_MethodDictionary()
-{
-    IdentityDictionary result = NEW_t(IdentityDictionary);\
-    HEADER(result) = MethodDictionary_Class;
-    result->size      = 0;
-    result->ratio     = new_SmallInt(500);
-    result->maxLinear = new_SmallInt(20);
-    result->data      = new_Array_withAll(1, (Optr)new_DictBucket(20 << 1));
-    result->linear    = true;
-    return result;
-}
-
 Class new_Bootstrapping_Class()
 {
     Class metacls = (Class)basic_instantiate_Object(metaclass, METACLASS_SIZE);
@@ -56,7 +43,7 @@ Class new_Bootstrapping_Class()
 Class new_Class(Class superclass, Optr metatype)
 {    
     ASSERT_TAG_LAYOUT(metatype, Object);
-    uns_int meta_size = GET_SIZE(metatype);
+    uns_int meta_size = ((Array)metatype)->size;
     assert0(meta_size >= 4); // we need at least place for
                              // methods, super, layout and instance.
 
@@ -65,8 +52,8 @@ Class new_Class(Class superclass, Optr metatype)
     Class result     = (Class)basic_instantiate_Object(metacls, meta_size);
     metacls->name    = (Symbol)result;
 
-    result->methods  = new_MethodDictionary();
-    metacls->methods = new_MethodDictionary();
+    result->methods  = new_IdentityDictionary();
+    metacls->methods = new_IdentityDictionary();
     Class_set_superclass(result, superclass);
 
     return result;
@@ -208,9 +195,7 @@ void Class_direct_dispatch_withArguments(Optr self, Class class,
                                          Optr msg, Array args)
 {
     long idx;
-    uns_int arg_size = GET_SIZE(args);
     
-<<<<<<< HEAD
 //    if (_thread_->next_interpreter != nil) {
 //        Message message = new_Message((Optr)msg, args->size);
 //        for (idx = 0; idx < args->size; idx++) {
@@ -224,50 +209,29 @@ void Class_direct_dispatch_withArguments(Optr self, Class class,
 //            (Optr)SMB_sendNext_to_class_, 3,
 //            (Optr)message, self, (Optr)class);
 //    } else {
-=======
-    if (_thread_->next_interpreter != nil) {
-        Message message = new_Message((Optr)msg, arg_size);
-        for (idx = 0; idx < arg_size; idx++) {
-            message->arguments[idx] = args->values[idx];
-        }
-        Optr next_interpreter = _thread_->next_interpreter;
-        _thread_->next_interpreter = nil;
-        Class_direct_dispatch(
-            next_interpreter,
-            HEADER(next_interpreter),
-            (Optr)SMB_sendNext_to_class_, 3,
-            (Optr)message, self, (Optr)class);
-    } else {
->>>>>>> 179c2964e2ecd69c983b5f215b4026aeb8b9e3d7
         PUSH_EXP(self);
-        for (idx = 0; idx < arg_size; idx++) {
+        for (idx = 0; idx < args->size; idx++) {
             PUSH_EXP(args->values[idx]);
         }
-<<<<<<< HEAD
         Class_do_dispatch(self, class, msg, args->size, T_Class_direct_dispatch);
 //    }
-=======
-        Class_do_dispatch(self, class, msg, arg_size, T_Class_direct_dispatch);
-    }
->>>>>>> 179c2964e2ecd69c983b5f215b4026aeb8b9e3d7
 }
 
 void Class_dispatch(Optr self, Class class, uns_int argc)
 {
     Send send   = (Send)PEEK_EXP(0);
+    Array cache = send->cache;
     
-#if defined PRINT_DISPATCH_TRACE || DTRACE
+    #if defined PRINT_DISPATCH_TRACE || DTRACE
     Symbol clsname;
     if (HEADER(class) != metaclass) {
         clsname = class->name;
     } else {
         clsname = ((Class)self)->name;
     }
-#endif // PRINT_DISPATCH_TRACE || DTRACE
+    #endif // PRINT_DISPATCH_TRACE || DTRACE
     
-#ifndef NO_IC
     // TODO properly initialize the inlinecache when creating new sends
-    Array cache = send->cache;
     if ((Optr)cache != nil) {
         Optr method = InlineCache_lookup(cache, (Optr)class);
         if (method) {
@@ -281,17 +245,16 @@ void Class_dispatch(Optr self, Class class, uns_int argc)
     } else {
         send->cache = new_InlineCache();
     }
-#endif //NO_IC
     assert_class((Optr)class);
     
     Optr msg = (Optr)send->message;
     assert0(msg != nil);
 
-#ifdef PRINT_DISPATCH_TRACE
-    String method_name  = String_concat_((String)clsname, new_String(L">>"));
-    method_name         = String_concat_(method_name, (String)msg);
-    LOG("%ls (%p)\n", method_name->value, self);
-#endif // PRINT_DISPATCH_TRACE
+    #ifdef PRINT_DISPATCH_TRACE
+    Symbol method  = String_concat_(clsname, new_String(L">>"));
+    method         = String_concat_(method, (String)msg);
+    LOG("%ls (%p)\n", method->value, self);
+    #endif // PRINT_DISPATCH_TRACE
     
     DT(MESSAGE, unicode_to_ascii(clsname->value), 
                 unicode_to_ascii(send->message->value));
@@ -301,18 +264,17 @@ void Class_dispatch(Optr self, Class class, uns_int argc)
 void Class_normal_dispatch(Optr self, Send send, uns_int argc)
 {
     Class class = HEADER(self);
+    Array cache = send->cache;
     
-#if defined PRINT_DISPATCH_TRACE || DTRACE
+    #if defined PRINT_DISPATCH_TRACE || DTRACE
     Symbol clsname;
     if (HEADER(class) != metaclass) {
         clsname = class->name;
     } else {
         clsname = ((Class)self)->name;
     }
-#endif // PRINT_DISPATCH_TRACE || DTRACE
+    #endif // PRINT_DISPATCH_TRACE || DTRACE
     
-#ifndef NO_IC
-    Array cache = send->cache;
     // TODO properly initialize the inlinecache when creating new sends
     if ((Optr)cache != nil) {
         Optr method = InlineCache_lookup(cache, (Optr)class);
@@ -326,17 +288,16 @@ void Class_normal_dispatch(Optr self, Send send, uns_int argc)
     } else {
         send->cache = new_InlineCache();
     }
-#endif //NO_IC
     assert_class((Optr)class);
     
     Optr msg = (Optr)send->message;
     assert0(msg != nil);
 
-#ifdef PRINT_DISPATCH_TRACE
-    String method_name  = String_concat_((String)clsname, new_String(L">>"));
-    method_name         = String_concat_(method_name, (String)msg);
-    LOG("%ls (%p)\n", method_name->value, self);
-#endif // PRINT_DISPATCH_TRACE
+    #ifdef PRINT_DISPATCH_TRACE
+    Symbol method  = String_concat_(clsname, new_String(L">>"));
+    method         = String_concat_(method, (String)msg);
+    LOG("%ls (%p)\n", method->value, self);
+    #endif // PRINT_DISPATCH_TRACE
 
     PUSH_EXP(send);
     DT(MESSAGE, unicode_to_ascii(clsname->value), 

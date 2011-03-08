@@ -37,7 +37,7 @@ extern Optr file_layout;
     assert0(TAG_IS_LAYOUT(tag, layout));
 
 #define TAG_SIZE(tag)\
-    GET_SIZE(tag)
+    (((Array)tag)->size)
 
 #define TAG_VAR(tag, index)\
     (((Array)tag)->values[index])
@@ -64,7 +64,6 @@ extern Array create_layout_with_vars(Class layout, uns_int size);
 extern void change_slot_type(Class class, Class type, long counter, ...);
 extern Object instantiate(Class cls);
 extern Array instantiate_sized(Class cls, uns_int size);
-extern Array instantiate_Array_with(Class class, uns_int base, uns_int extra, ...);
 
 /* ========================================================================= */
 

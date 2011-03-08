@@ -6,15 +6,12 @@
 /* ========================================================================= */
 
 struct DictBucket_t {
-    ARRAY_SIZE_TYPE;
+    uns_int size;
     uns_int tally;
     Optr  values[];
 };
 
 CREATE_INITIALIZERS(DictBucket);
-
-extern void late_init_DictBucket();
-
 extern DictBucket new_DictBucket_raw(uns_int size);
 extern DictBucket new_DictBucket(uns_int size);
 extern void Bucket_grow(DictBucket * bucketp);

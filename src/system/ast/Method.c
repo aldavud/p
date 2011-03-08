@@ -16,9 +16,9 @@ Method new_Method_with(Array params,
     result->locals = locals;
     result->annotations = annotations;
     init_variable_array(result->params, 0);
-    init_variable_array(result->locals, GET_SIZE(result->params));
+    init_variable_array(result->locals, result->params->size);
     result->info    = empty_Info;
-    SET_SIZE(result, statementCount);
+    result->size    = statementCount;
     result->package = nil;
     result->code    = threaded;
     COPY_ARGS(statementCount, result->body);

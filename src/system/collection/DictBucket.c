@@ -11,7 +11,7 @@ DECLARE_CLASS(DictBucket);
 DictBucket new_DictBucket_raw(uns_int size)
 {
     NEW_ARRAY_OBJECT(DictBucket, Optr[size]);
-    SET_SIZE(result, size);
+    result->size  = size;
     result->tally = 0;
     return result;
 }
@@ -36,14 +36,13 @@ DictBucket new_bucket()
 void Bucket_grow(DictBucket * bucketp)
 {
     DictBucket old_bucket = *bucketp;
-    uns_int size = GET_SIZE(old_bucket);
-    DictBucket new_bucket = new_DictBucket_raw(size << 1);
+    DictBucket new_bucket = new_DictBucket_raw(old_bucket->size << 1);
     long i;
-    for(i = 0; i < size; i++) {
+    for(i = 0; i < old_bucket->size; i++) {
         new_bucket->values[i] = old_bucket->values[i];
     }
     new_bucket->tally = old_bucket->tally;
-    for(; i < GET_SIZE(new_bucket); i++) {
+    for(; i < new_bucket->size; i++) {
         new_bucket->values[i] = nil;
     }
     *bucketp = new_bucket;
@@ -97,7 +96,7 @@ long Bucket_quick_store(DictBucket * bucketp, Optr key,
                 return 0;
         }
     }
-    if (tally == GET_SIZE(bucket)) {
+    if (tally == bucket->size) {
         Bucket_grow(bucketp);
         bucket = *bucketp;
     }
@@ -113,12 +112,4 @@ long Bucket_quick_store(DictBucket * bucketp, Optr key,
 void post_init_DictBucket()
 {
     change_slot_type(DictBucket_Class, UintSlot_Class, 1, 0);
-}
-
-void late_init_DictBucket()
-{
-#ifdef DICT_NONATIVE
-	// remove all the additional natives from the DICT class
-	Eval_Send0((Optr)DictBucket_Class, new_Symbol(L"removeNatives"));
-#endif
 }

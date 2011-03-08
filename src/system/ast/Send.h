@@ -6,7 +6,7 @@
 /* ========================================================================= */
 
 struct Send_t {
-    ARRAY_SIZE_TYPE;
+    uns_int size;
     Array   cache;
     Symbol  message;
     Optr    receiver;
