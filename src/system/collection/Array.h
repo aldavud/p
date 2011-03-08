@@ -5,14 +5,28 @@
 
 /* ========================================================================= */
 
+#ifdef ARRAY_WRAPPED
+    #define GET_SIZE(array) ((Array)(array))->size->value
+    #define SET_SIZE(array, value) ((Array)array)->size = new_SmallInt(value);
+    #define ARRAY_SIZE_TYPE SmallInt size
+#else //ARRAY_WRAPPED
+    #define GET_SIZE(array) ((Array)(array))->size
+    #define SET_SIZE(array, value) ((Array)array)->size = (value);
+    #define ARRAY_SIZE_TYPE uns_int size
+#endif //ARRAY_WRAPPED
+
+/* ========================================================================= */
+
 struct Array_t {
-    uns_int size;
+    ARRAY_SIZE_TYPE;
     Optr  values[];
 };
 
 extern Array empty_Array;
 
-CREATE_INITIALIZERS(Array)
+CREATE_INITIALIZERS(Array);
+
+extern void late_init_Array();
 
 extern Array new_Array_raw(uns_int c);
 extern Array new_Array(uns_int c, Optr v[]);

@@ -51,6 +51,7 @@ void * pinocchio_main_thread(void * argc)
 {
     initialize_Thread();
     init_lib();
+	#include <pinocchioLateInit.ci>
 
     _thread_ = new_Thread(STACK_SIZE);
 
@@ -61,7 +62,7 @@ void * pinocchio_main_thread(void * argc)
     Array args = get_args((int)(uns_int)argc, cargv);
     // Optr result = Eval_Send0(new_SmallInt(30), raw_Symbol(L"fib"));
     // inspect(result);
-    Eval_Send1((Optr)Interpretation_MainInterpreter_Class,
+    Eval_Send1((Optr)Interpretation_Main_Class,
                new_Symbol(L"main:"), (Optr)args);
 
     return EXIT_SUCCESS;

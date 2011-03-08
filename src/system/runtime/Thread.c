@@ -13,16 +13,21 @@ static Symbol SMB_for_thread_holder_;
 void reset_thread(Thread thread)
 {
     thread->_EXP_            = &thread->Double_Stack[-1];
-    thread->_CNT_            = (threaded**)&thread->Double_Stack[thread->size];
+    thread->_CNT_            = (threaded**)&thread->Double_Stack[GET_SIZE(thread)];
     thread->_ENV_            = nil;
+<<<<<<< HEAD
 //    thread->next_interpreter = nil;
     thread->storage          = new_IdentityDictionary();
+=======
+    thread->next_interpreter = nil;
+    thread->storage          = (Optr)new_IdentityDictionary();
+>>>>>>> 179c2964e2ecd69c983b5f215b4026aeb8b9e3d7
 }
 
 Thread new_Thread(uns_int size)
 {
     NEW_ARRAY_OBJECT(Thread, Optr[size]);
-    result->size  = size;
+    SET_SIZE(result, size);
     reset_thread(result);
     return result;
 }
@@ -85,11 +90,11 @@ NATIVE2(Thread_primFor_holder_)
 time_t start_sleep_time;
 
 NATIVE1(Thread_sleep_)
-    Optr value = NATIVE_ARG(0);
+	/*Optr value = NATIVE_ARG(0);
     start_sleep_time = time(NULL);
 
     time_t now = time(NULL);
-    /*if (now - start_sleep_time > unwrap_int(value)) {
+    if (now - start_sleep_time > unwrap_int(value)) {
         RETURN_FROM_NATIVE(nil);
     }
     else

@@ -104,7 +104,8 @@ void print_Symbol(FILE* stream, Optr s)
 
 uns_int nrsends()
 {
-    uns_int size = EXP_SIZE();
+    return 1;
+    /*uns_int size = EXP_SIZE();
     uns_int cur = 0;
     uns_int nr = 0;
     while (cur < size) {
@@ -113,7 +114,7 @@ uns_int nrsends()
             nr++;
         }
     }
-    return nr;
+    return nr;*/
 }
 
 void sends()
@@ -135,7 +136,7 @@ Optr atn(Optr o, const wchar_t * s)
     Optr tag = GETTAG(o);
     if (TAG_IS_LAYOUT(tag, Object)) {
         int i;
-        uns_int size = ((Array)tag)->size;
+        uns_int size = GET_SIZE(tag);
         for (i = 0; i < size; i++) {
             Slot v = (Slot)((Array)tag)->values[i];
             Symbol sym = (Symbol)v->name;
@@ -145,7 +146,7 @@ Optr atn(Optr o, const wchar_t * s)
         assert(NULL, fwprintf(stderr, L"Var not found: %ls\n", s););
     }
     if (TAG_IS_LAYOUT(tag, Array)) {
-        uns_int size = ((Array)tag)->size;
+        uns_int size = GET_SIZE(tag);
         int i;
         for (i = 0; i < size; i++) {
             Slot v = (Slot)((Array)tag)->values[i];
@@ -162,14 +163,14 @@ Optr atn(Optr o, const wchar_t * s)
 Optr dict_at(Optr o, uns_int at)
 {
     Dictionary dict = (Dictionary)o;
-    uns_int ds = dict->data->size;
+    uns_int ds = GET_SIZE(dict->data);
     uns_int i;
     uns_int idx = 0;
     for (i = 0; i < ds; i++) {
         Array bucket = (Array)dict->data->values[i];
         if (bucket == (Array)nil) { continue; }
         uns_int j;
-        for (j = 0; j < bucket->size; j+=2) {
+        for (j = 0; j < GET_SIZE(bucket); j+=2) {
             if (bucket->values[j] == nil) { break; }
             if (idx == at) {
                 return bucket->values[j+1];
@@ -187,13 +188,13 @@ Optr at(Optr o, uns_int i)
     }
     Optr tag = GETTAG(o);
     if (TAG_IS_LAYOUT(tag, Object)) {
-        uns_int size = ((Array)tag)->size;
+        uns_int size = GET_SIZE(tag);
         assert0(i < size);
         return ((Object)o)->ivals[i];
     }
     if (TAG_IS_LAYOUT(tag, Array)) {
-        uns_int size = ((Array)tag)->size;
-        uns_int isize = ((Array)o)->size;
+        uns_int size  = GET_SIZE(tag);
+        uns_int isize = GET_SIZE(o);
         assert0(i < size + isize);
         return ((Array)o)->values[i];
     }
@@ -264,14 +265,14 @@ void shallow_inspect(FILE* stream, Optr o)
 void inspect_dict(FILE* stream, Optr o)
 {
     Dictionary dict = (Dictionary)o;
-    uns_int ds      = dict->data->size;
+    uns_int ds      = GET_SIZE(dict->data);
     uns_int i;
     uns_int idx = 0;
     for (i = 0; i < ds; i++) {
         Array bucket = (Array)dict->data->values[i];
         if (bucket == (Array)nil) { continue; }
         uns_int j;
-        for (j = 0; j < bucket->size; j+=2) {
+        for (j = 0; j < GET_SIZE(bucket); j+=2) {
             Optr key = bucket->values[j];
             if (key == nil) { break; }
             fwprintf(stream, L"%lu ", idx++);
@@ -294,7 +295,7 @@ void inspect(FILE* stream, Optr o)
     }
     Optr tag = GETTAG(o);
     if (TAG_IS_LAYOUT(tag, Object)) {
-        uns_int size = ((Array)tag)->size;
+        uns_int size = GET_SIZE(tag);
         int i;
         for (i = 0; i < size; i++) {
             Slot v = (Slot)((Array)tag)->values[i];
@@ -305,8 +306,8 @@ void inspect(FILE* stream, Optr o)
     }
 
     if (TAG_IS_LAYOUT(tag, Array)) {
-        uns_int size  = ((Array)tag)->size;
-        uns_int isize = ((Array)o)->size;
+        uns_int size  = GET_SIZE(tag);
+        uns_int isize = GET_SIZE(o);
         int i;
         for (i = 0; i < size; i++) {
             Slot v = (Slot)((Array)tag)->values[i];

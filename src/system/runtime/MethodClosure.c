@@ -19,8 +19,8 @@ static MethodContext activate_method(MethodClosure closure, long argc)
 {
 	//TODO merge with BlockContext
     Method method        = closure->code;
-    uns_int paramc       = method->params->size;
-    uns_int localc       = method->locals->size;
+    uns_int paramc       = GET_SIZE(method->params);
+    uns_int localc       = GET_SIZE(method->locals);
     uns_int size         = paramc + localc;
 
     MethodContext context = (MethodContext)&PEEK_EXP(argc - 1);
@@ -40,7 +40,7 @@ static MethodContext activate_method(MethodClosure closure, long argc)
     }
     
     HEADER(context)       = MethodContext_Class;
-	context->size         = size;
+    SET_SIZE(context, size);
 	context->stacked      = true;
 	context->parent_frame = current_env();
     set_env((Optr)context);
@@ -58,11 +58,11 @@ void Method_invoke(MethodClosure closure,
                    Optr self, uns_int argc)
 {
     assert1(method->code != (Array)nil, "Uncompiled method found!");
-    assert(argc == method->params->size,
+    assert(argc == GET_SIZE(method->params),
         printf("Argument count mismatch. Expected: %lu given: %lu\n",
-               method->params->size, argc););
+                GET_SIZE(method->params), argc););
     
-    if (method->size == 0) {
+    if (GET_SIZE(method) == 0) {
         RETURN_FROM_NATIVE(self);
         return;
     }
@@ -93,14 +93,14 @@ NATIVE1(MethodClosure_valueWithArguments_)
     Array args = (Array)pop_EXP();
     ASSERT_TAG_LAYOUT(GETTAG(args), Array);
     
-    long pos = args->size;
+    long pos = GET_SIZE(args);
     while(pos > 0) {
         pos--;
         PUSH_EXP(args->values[pos]);
     }
     
     BlockClosure closure = (BlockClosure)self;
-    BlockClosure_apply(closure, args->size);
+    BlockClosure_apply(closure, GET_SIZE(args));
 }
 
 /* ========================================================================= */
