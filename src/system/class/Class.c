@@ -88,7 +88,7 @@ void invoke(Optr method, Optr self, uns_int argc) {
             return;
         }
 
-        if (counter >= 5000) {
+        if (counter >= 100000) {
             counter = 0;
             yield();
         } else {

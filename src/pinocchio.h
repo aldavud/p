@@ -140,7 +140,7 @@ typedef struct Nil{} Nil;
 
 /* ========================================================================= */
 
-#define STACK_SIZE 1024*1024
+#define STACK_SIZE 2048*2048
 #define INT_CACHE_LOWER -1
 #define INT_CACHE_UPPER 1023
 
