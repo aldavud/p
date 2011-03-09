@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+export CFLAGS="${CFLAGS} -D_XOPEN_SOURCE -arch x86_64"
+
+curl http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/gc-7.1.tar.gz -o boehm.tar.gz
+tar xzf boehm.tar.gz
+
+cd gc-7.1
+./configure --disable-threads
+make
+sudo make install
+cd ..
+rm ./boehm.tar.gz
+rm -rf ./gc-7.1
+
+curl http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.5.tar.gz -o ncurses.tar.gz
+tar xzf ncurses.tar.gz
+
+cd ncurses-5.5
+./configure
+make
+sudo make install
+rm ../ncurses-5.8.tar.gz
+rm -rf ../ncurses-5.8
+
